@@ -27,9 +27,13 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 jwt:
-  secret: ${JWT_SECRET:dev-only-secret-change-in-production-must-be-at-least-512-bits-long-for-hs512}
+  secret: ${JWT_SECRET:dGhpcyBpcyBhIGRldmVsb3BtZW50IHBsYWNlaG9sZGVyIHNlY3JldA==}
   expiration: ${JWT_EXPIRATION:86400000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:false}
 
 springdoc:
   api-docs:
