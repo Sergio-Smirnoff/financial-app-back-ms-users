@@ -5,7 +5,6 @@ import com.financialapp.users.model.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -13,10 +12,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
-@RequiredArgsConstructor
 public class JwtService {
 
     private final JwtProperties jwtProperties;
+    private final SecretKey signingKey;
+
+    public JwtService(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+        this.signingKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateAccessToken(User user) {
         return Jwts.builder()
@@ -25,7 +29,7 @@ public class JwtService {
                 .claim("firstName", user.getFirstName())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
-                .signWith(getSigningKey())
+                .signWith(signingKey)
                 .compact();
     }
 
@@ -35,13 +39,13 @@ public class JwtService {
                 .claim("type", "refresh")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshExpiration()))
-                .signWith(getSigningKey())
+                .signWith(signingKey)
                 .compact();
     }
 
     public Claims validateToken(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -52,8 +56,4 @@ public class JwtService {
         return Long.parseLong(claims.getSubject());
     }
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
 }

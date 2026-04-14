@@ -1,5 +1,6 @@
 server:
   port: 8081
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -9,12 +10,22 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:financialapp}
     password: ${SPRING_DATASOURCE_PASSWORD:changeme}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         default_schema: users
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
     show-sql: false
   flyway:
     schemas: users
