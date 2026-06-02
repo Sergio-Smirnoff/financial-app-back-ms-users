@@ -140,7 +140,7 @@
     </dependencies>
 
     <build>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/unit/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -174,9 +174,6 @@
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
-                        <configuration>
-                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -249,8 +246,6 @@
                             </rules>
                             <excludes>
                                 <exclude>com/financialapp/users/UsersApplication.class</exclude>
-                                <!-- anterior/* is dead-code archive; see coverage-review-queue.md -->
-                                <exclude>com/financialapp/users/anterior/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
