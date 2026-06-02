@@ -140,7 +140,7 @@
     </dependencies>
 
     <build>
-        <testSourceDirectory>src/test/unit/java</testSourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -3,7 +3,6 @@ package com.financialapp.users.infrastructure.persistence.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
