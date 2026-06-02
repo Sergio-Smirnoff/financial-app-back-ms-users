@@ -24,6 +24,7 @@ spring:
         default_schema: users
         jdbc:
           batch_size: 20
+          time_zone: UTC
         order_inserts: true
         order_updates: true
     show-sql: false
@@ -36,6 +37,10 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+internal:
+  auth:
+    token: ${INTERNAL_AUTH_TOKEN:local-dev-token}
 
 jwt:
   secret: ${JWT_SECRET:dGhpcyBpcyBhIGRldmVsb3BtZW50IHBsYWNlaG9sZGVyIHNlY3JldA==}

@@ -119,14 +119,142 @@
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>1.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-jetty12</artifactId>
+            <version>3.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
+        <testSourceDirectory>src/test/unit/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-integration-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals><goal>add-test-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/integration/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <!-- Unit test agent -->
+                    <execution>
+                        <id>prepare-agent-ut</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco-ut.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <!-- Integration test agent -->
+                    <execution>
+                        <id>prepare-agent-it</id>
+                        <phase>pre-integration-test</phase>
+                        <goals><goal>prepare-agent-integration</goal></goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <!-- Merge both exec files -->
+                    <execution>
+                        <id>merge-results</id>
+                        <phase>verify</phase>
+                        <goals><goal>merge</goal></goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>jacoco-ut.exec</include>
+                                        <include>jacoco-it.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <!-- Coverage report from merged data -->
+                    <execution>
+                        <id>report-merged</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-merged</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- 100% LINE + BRANCH gate -->
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>1.00</minimum></limit>
+                                        <limit><counter>BRANCH</counter><value>COVEREDRATIO</value><minimum>1.00</minimum></limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                            <excludes>
+                                <exclude>com/financialapp/users/UsersApplication.class</exclude>
+                                <!-- anterior/* is dead-code archive; see coverage-review-queue.md -->
+                                <exclude>com/financialapp/users/anterior/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
