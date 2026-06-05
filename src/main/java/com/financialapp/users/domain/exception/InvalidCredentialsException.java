@@ -1,7 +1,9 @@
 package com.financialapp.users.domain.exception;
 
-public class InvalidCredentialsException extends RuntimeException {
+import com.financialapp.commons.core.error.DomainException;
+
+public class InvalidCredentialsException extends DomainException {
     public InvalidCredentialsException() {
-        super("Invalid email or password");
+        super(DomainError.INVALID_CREDENTIALS, "Invalid email or password");
     }
 }

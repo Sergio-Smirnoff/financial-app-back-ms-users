@@ -15,6 +15,13 @@ Auth service for the financial-app platform. Handles registration, login, token 
 
 All routes under `/api/v1/auth`. Exempt from JWT validation at the gateway.
 
+All responses use the shared envelope `{ status, title, code, message, data }` from `commons-core`
+(`com.financialapp.commons.core.response.ApiResponse`); `code` appears only on errors with the
+`DomainError` slug (`invalid_credentials`, `email_already_registered`, `user_not_found`,
+`invalid_token`, `authentication_required`). Endpoints declare their throwable codes with
+`@ApiErrorCodes`, so Swagger lists each error with a generated example body.
+
+
 | Method | Path | Request body | Success response | Status |
 |--------|------|-------------|-----------------|--------|
 | `POST` | `/api/v1/auth/register` | `{ email, password (≥8), firstName, lastName }` | `ApiResponse<AuthResponse>` + 3 cookies set | `201 Created` |
@@ -122,7 +129,7 @@ back/ms-users/src/main/java/com/financialapp/users/
     │   │   ├── LoginRequest.java
     │   │   └── RegisterRequest.java
     │   └── response/
-    │       ├── ApiResponse.java
+    │       ├── (envelope from commons-core)
     │       └── AuthResponse.java
     └── error/
         └── GlobalExceptionHandler.java

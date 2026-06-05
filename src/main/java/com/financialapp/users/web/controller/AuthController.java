@@ -11,7 +11,9 @@ import com.financialapp.users.domain.usecase.command.RegisterUserCommand;
 import com.financialapp.users.web.CookieService;
 import com.financialapp.users.web.dto.request.LoginRequest;
 import com.financialapp.users.web.dto.request.RegisterRequest;
-import com.financialapp.users.web.dto.response.ApiResponse;
+import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.commons.web.openapi.ApiErrorCodes;
+import com.financialapp.users.domain.exception.DomainError;
 import com.financialapp.users.web.dto.response.AuthResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class AuthController {
     private final CookieService cookieService;
 
     @PostMapping("/register")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"email_already_registered"})
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         Session session = registerUseCase.execute(
                 new RegisterUserCommand(request.email(), request.password(), request.firstName(), request.lastName())
@@ -39,6 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"invalid_credentials"})
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         Session session = authenticateUseCase.execute(
                 new AuthenticateUserCommand(request.email(), request.password())
@@ -47,6 +51,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @ApiErrorCodes(catalog = DomainError.class, value = {"user_not_found", "invalid_token", "authentication_required"})
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(
             @CookieValue(name = "refresh_token") String refreshToken) {
         Session session = refreshSessionUseCase.execute(new RefreshSessionCommand(refreshToken));
@@ -75,6 +80,9 @@ public class AuthController {
                 .lastName(user.lastName())
                 .build();
 
-        return ResponseEntity.status(status).headers(headers).body(ApiResponse.ok(message, authResponse));
+        ApiResponse<AuthResponse> body = status == HttpStatus.CREATED
+                ? ApiResponse.created(message, authResponse)
+                : ApiResponse.ok(message, authResponse);
+        return ResponseEntity.status(status).headers(headers).body(body);
     }
 }

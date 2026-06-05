@@ -1,7 +1,9 @@
 package com.financialapp.users.domain.exception;
 
-public class UserNotFoundException extends RuntimeException {
+import com.financialapp.commons.core.error.DomainException;
+
+public class UserNotFoundException extends DomainException {
     public UserNotFoundException(String message) {
-        super(message);
+        super(DomainError.USER_NOT_FOUND, message);
     }
 }
