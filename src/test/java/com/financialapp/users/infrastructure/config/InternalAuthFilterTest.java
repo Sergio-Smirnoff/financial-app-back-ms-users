@@ -63,6 +63,36 @@ class InternalAuthFilterTest {
         verifyNoInteractions(chain);
     }
 
+    @Test
+    void doFilterInternal_blocks_whenInternalTokenIsEmpty() throws Exception {
+        ReflectionTestUtils.setField(filter, "internalToken", "");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/v1/auth/login");
+        request.addHeader("X-Internal-Token", "");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilterInternal(request, response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verifyNoInteractions(chain);
+    }
+
+    @Test
+    void doFilterInternal_blocks_whenInternalTokenNotConfigured() throws Exception {
+        ReflectionTestUtils.setField(filter, "internalToken", null);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/v1/auth/login");
+        request.addHeader("X-Internal-Token", "anything");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilterInternal(request, response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verifyNoInteractions(chain);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"/actuator/health", "/swagger-ui/index.html", "/v3/api-docs/users"})
     void doFilterInternal_skipsTokenCheck_forPublicPaths(String path) throws Exception {
