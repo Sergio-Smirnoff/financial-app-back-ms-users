@@ -8,8 +8,8 @@ CREATE TABLE users.outbox_event (
     data_schema   VARCHAR(512) NOT NULL,
     data_json     JSONB        NOT NULL,
     sent          BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at    TIMESTAMP    NOT NULL DEFAULT now(),
-    sent_at       TIMESTAMP
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    sent_at       TIMESTAMPTZ
 );
 
 CREATE INDEX idx_users_outbox_unsent ON users.outbox_event (sent, id);
