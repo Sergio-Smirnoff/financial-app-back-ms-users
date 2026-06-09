@@ -5,7 +5,7 @@ Auth service for the financial-app platform. Handles registration, login, token 
 - **Port:** 8081
 - **DB schema:** `users`
 - **Tech stack:** Java 21, Spring Boot 3.4.2, Spring MVC, Spring Security (stateless), JWT (JJWT / HMAC-SHA), BCrypt, Flyway, Kafka
-- **Kafka topic published:** `user.registered`
+- **Kafka topic published:** `users.user.registered` (CloudEvents 1.0, binary mode; via transactional outbox)
 
 > Full design: `docs/specs/services/ms-users.md` (parent workspace).
 
@@ -106,11 +106,10 @@ back/ms-users/src/main/java/com/financialapp/users/
 │   │   ├── AuthenticationProviderGatewayImpl.java
 │   │   └── PasswordHashGatewayImpl.java
 │   ├── messaging/
-│   │   ├── DomainEventPublisherImpl.java
-│   │   ├── TransactionalKafkaEvent.java
-│   │   ├── TransactionalKafkaListener.java
+│   │   ├── DomainEventPublisherImpl.java        # routes domain events to the outbox
+│   │   ├── mapper/UserRegisteredEventMapper.java # DomainEventMapper → OutboxRecord
 │   │   └── payload/
-│   │       └── UserRegisteredPayload.java
+│   │       └── UserRegisteredData.java          # CloudEvent data record
 │   └── persistence/
 │       ├── entity/
 │       │   └── UserJpaEntity.java
