@@ -12,7 +12,7 @@ class KafkaConfigTest {
     @Test
     void userRegisteredTopic_returnsTopicWithCorrectName() {
         NewTopic topic = kafkaConfig.userRegisteredTopic();
-        assertThat(topic.name()).isEqualTo("user.registered");
+        assertThat(topic.name()).isEqualTo("users.user.registered");
     }
 
     @Test

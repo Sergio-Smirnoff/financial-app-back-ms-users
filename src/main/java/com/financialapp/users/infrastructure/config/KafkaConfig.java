@@ -10,7 +10,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic userRegisteredTopic() {
-        return TopicBuilder.name("user.registered")
+        return TopicBuilder.name("users.user.registered")
                 .partitions(1)
                 .replicas(1)
                 .build();
