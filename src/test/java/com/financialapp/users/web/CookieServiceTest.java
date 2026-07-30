@@ -3,6 +3,7 @@ package com.financialapp.users.web;
 import com.financialapp.users.domain.model.Session;
 import com.financialapp.users.domain.model.User;
 import com.financialapp.users.domain.model.valueObject.UserId;
+import com.financialapp.users.infrastructure.config.JwtProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
@@ -21,7 +22,11 @@ class CookieServiceTest {
 
     @BeforeEach
     void setUp() {
-        cookieService = new CookieService(false, 86_400_000L, 604_800_000L);
+        JwtProperties jwtProperties = new JwtProperties();
+        jwtProperties.setExpiration(86_400_000L);
+        jwtProperties.setRefreshExpiration(604_800_000L);
+        jwtProperties.setSecret("secret");
+        cookieService = new CookieService(false, jwtProperties);
     }
 
     private Session session() {

@@ -1,9 +1,11 @@
 package com.financialapp.users.web.controller;
 
 import com.financialapp.commons.core.response.ApiResponse;
+import com.financialapp.users.domain.gateway.AuthenticationProviderGateway;
 import com.financialapp.users.domain.model.Session;
 import com.financialapp.users.domain.model.User;
 import com.financialapp.users.domain.model.valueObject.UserId;
+import com.financialapp.users.domain.repository.UserSessionRepository;
 import com.financialapp.users.domain.usecase.AuthenticateUserUseCase;
 import com.financialapp.users.domain.usecase.RefreshSessionUseCase;
 import com.financialapp.users.domain.usecase.RegisterUserUseCase;
@@ -27,6 +29,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +40,8 @@ class AuthControllerTest {
     private RegisterUserUseCase registerUseCase;
     private AuthenticateUserUseCase authenticateUseCase;
     private RefreshSessionUseCase refreshSessionUseCase;
+    private UserSessionRepository userSessionRepository;
+    private AuthenticationProviderGateway authProvider;
     private CookieService cookieService;
     private AuthController controller;
 
@@ -44,8 +50,10 @@ class AuthControllerTest {
         registerUseCase = mock(RegisterUserUseCase.class);
         authenticateUseCase = mock(AuthenticateUserUseCase.class);
         refreshSessionUseCase = mock(RefreshSessionUseCase.class);
+        userSessionRepository = mock(UserSessionRepository.class);
+        authProvider = mock(AuthenticationProviderGateway.class);
         cookieService = mock(CookieService.class);
-        controller = new AuthController(registerUseCase, authenticateUseCase, refreshSessionUseCase, cookieService);
+        controller = new AuthController(registerUseCase, authenticateUseCase, refreshSessionUseCase, userSessionRepository, authProvider, cookieService);
     }
 
     private Session session() {
@@ -55,9 +63,9 @@ class AuthControllerTest {
     }
 
     private void stubAuthCookies() {
-        when(cookieService.createAccessTokenCookie("access-tok"))
+        when(cookieService.createAccessTokenCookie(anyString()))
                 .thenReturn(ResponseCookie.from("access_token", "access-tok").path("/api").build());
-        when(cookieService.createRefreshTokenCookie("refresh-tok"))
+        when(cookieService.createRefreshTokenCookie(anyString(), anyBoolean()))
                 .thenReturn(ResponseCookie.from("refresh_token", "refresh-tok").path("/api/v1/auth/refresh").build());
         when(cookieService.createUserInfoCookie(any(Session.class)))
                 .thenReturn(ResponseCookie.from("user_info", "7|jane@doe.com|Jane+Doe").path("/").build());
@@ -66,11 +74,11 @@ class AuthControllerTest {
     @Test
     void register_returnsCreatedWithAuthCookiesAndBody() {
         Session session = session();
-        RegisterRequest request = new RegisterRequest("jane@doe.com", "password1", "Jane", "Doe");
+        RegisterRequest request = new RegisterRequest("jane@doe.com", "password1", "Jane", "Doe", false);
         when(registerUseCase.execute(any(RegisterUserCommand.class))).thenReturn(session);
         stubAuthCookies();
 
-        ResponseEntity<ApiResponse<AuthResponse>> response = controller.register(request);
+        ResponseEntity<ApiResponse<AuthResponse>> response = controller.register(request, "Mozilla/5.0");
 
         ArgumentCaptor<RegisterUserCommand> captor = ArgumentCaptor.forClass(RegisterUserCommand.class);
         verify(registerUseCase).execute(captor.capture());
@@ -100,11 +108,11 @@ class AuthControllerTest {
     @Test
     void login_returnsOkWithAuthCookiesAndBody() {
         Session session = session();
-        LoginRequest request = new LoginRequest("jane@doe.com", "password1");
+        LoginRequest request = new LoginRequest("jane@doe.com", "password1", false);
         when(authenticateUseCase.execute(any(AuthenticateUserCommand.class))).thenReturn(session);
         stubAuthCookies();
 
-        ResponseEntity<ApiResponse<AuthResponse>> response = controller.login(request);
+        ResponseEntity<ApiResponse<AuthResponse>> response = controller.login(request, "Mozilla/5.0");
 
         ArgumentCaptor<AuthenticateUserCommand> captor = ArgumentCaptor.forClass(AuthenticateUserCommand.class);
         verify(authenticateUseCase).execute(captor.capture());
@@ -124,7 +132,7 @@ class AuthControllerTest {
         when(refreshSessionUseCase.execute(any(RefreshSessionCommand.class))).thenReturn(session);
         stubAuthCookies();
 
-        ResponseEntity<ApiResponse<AuthResponse>> response = controller.refresh("refresh-tok-input");
+        ResponseEntity<ApiResponse<AuthResponse>> response = controller.refresh("refresh-tok-input", "Mozilla/5.0");
 
         ArgumentCaptor<RefreshSessionCommand> captor = ArgumentCaptor.forClass(RefreshSessionCommand.class);
         verify(refreshSessionUseCase).execute(captor.capture());
@@ -144,7 +152,7 @@ class AuthControllerTest {
                 ResponseCookie.from("user_info", "").path("/").maxAge(0).build()
         ));
 
-        ResponseEntity<ApiResponse<Void>> response = controller.logout();
+        ResponseEntity<ApiResponse<Void>> response = controller.logout("some-refresh-token");
 
         verify(cookieService).createLogoutCookies();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

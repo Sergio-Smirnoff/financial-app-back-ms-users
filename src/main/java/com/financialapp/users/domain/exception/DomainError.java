@@ -10,6 +10,9 @@ public enum DomainError implements ErrorCode {
     USER_NOT_FOUND(ErrorCategory.NOT_FOUND, "user_not_found"),
     INVALID_TOKEN(ErrorCategory.UNAUTHORIZED, "invalid_token"),
     AUTHENTICATION_REQUIRED(ErrorCategory.UNAUTHORIZED, "authentication_required"),
+    WRONG_CURRENT_PASSWORD(ErrorCategory.BAD_REQUEST, "wrong_current_password"),
+    WEAK_PASSWORD(ErrorCategory.BAD_REQUEST, "weak_password"),
+    SESSION_NOT_FOUND(ErrorCategory.NOT_FOUND, "session_not_found"),
     INTERNAL_ERROR(ErrorCategory.INTERNAL_SERVER_ERROR, "internal_error");
 
     private final ErrorCategory category;

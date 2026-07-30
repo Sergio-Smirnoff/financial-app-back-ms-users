@@ -4,8 +4,14 @@ import com.financialapp.users.domain.exception.UserNotFoundException;
 import com.financialapp.users.domain.gateway.AuthenticationProviderGateway;
 import com.financialapp.users.domain.model.Session;
 import com.financialapp.users.domain.model.User;
+import com.financialapp.users.domain.model.UserSession;
+import com.financialapp.users.domain.model.valueObject.DeviceLabel;
+import com.financialapp.users.domain.model.valueObject.RefreshTokenClaims;
+import com.financialapp.users.domain.model.valueObject.RefreshTokenId;
+import com.financialapp.users.domain.model.valueObject.SessionId;
 import com.financialapp.users.domain.model.valueObject.UserId;
 import com.financialapp.users.domain.repository.UserRepository;
+import com.financialapp.users.domain.repository.UserSessionRepository;
 import com.financialapp.users.domain.usecase.command.RefreshSessionCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,17 +19,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RefreshSessionUseCaseImplTest {
 
     @Mock UserRepository repository;
+    @Mock UserSessionRepository userSessionRepository;
     @Mock AuthenticationProviderGateway authProvider;
 
     @InjectMocks RefreshSessionUseCaseImpl useCase;
@@ -40,10 +51,15 @@ class RefreshSessionUseCaseImplTest {
         // Given
         UserId userId = new UserId(1L);
         User user = user();
-        when(authProvider.getUserId("refresh-tok")).thenReturn(userId);
+        RefreshTokenId jti = RefreshTokenId.generate();
+        RefreshTokenClaims claims = new RefreshTokenClaims(userId, jti);
+        UserSession userSession = new UserSession(new SessionId(100L), userId, jti, DeviceLabel.fromUserAgent(null), false, LocalDateTime.now(), LocalDateTime.now(), false);
+
+        when(authProvider.getRefreshTokenClaims("refresh-tok")).thenReturn(claims);
+        when(userSessionRepository.findByRefreshTokenId(jti)).thenReturn(Optional.of(userSession));
         when(repository.findById(userId)).thenReturn(Optional.of(user));
-        when(authProvider.generateAuthenticationToken(user)).thenReturn("new-access");
-        when(authProvider.refreshAuthenticationToken(user)).thenReturn("new-refresh");
+        when(authProvider.generateAuthenticationToken(any(User.class), any())).thenReturn("new-access");
+        when(authProvider.refreshAuthenticationToken(any(User.class), any(), anyBoolean())).thenReturn("new-refresh");
 
         // When
         Session session = useCase.execute(COMMAND);
@@ -58,7 +74,12 @@ class RefreshSessionUseCaseImplTest {
     void execute_throwsUserNotFoundException_whenUserDoesNotExist() {
         // Given
         UserId userId = new UserId(99L);
-        when(authProvider.getUserId("refresh-tok")).thenReturn(userId);
+        RefreshTokenId jti = RefreshTokenId.generate();
+        RefreshTokenClaims claims = new RefreshTokenClaims(userId, jti);
+        UserSession userSession = new UserSession(new SessionId(100L), userId, jti, DeviceLabel.fromUserAgent(null), false, LocalDateTime.now(), LocalDateTime.now(), false);
+
+        when(authProvider.getRefreshTokenClaims("refresh-tok")).thenReturn(claims);
+        when(userSessionRepository.findByRefreshTokenId(jti)).thenReturn(Optional.of(userSession));
         when(repository.findById(userId)).thenReturn(Optional.empty());
 
         // When / Then
