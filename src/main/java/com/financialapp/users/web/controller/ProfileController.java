@@ -6,12 +6,14 @@ import com.financialapp.users.domain.exception.DomainError;
 import com.financialapp.users.domain.gateway.AuthenticationProviderGateway;
 import com.financialapp.users.domain.model.User;
 import com.financialapp.users.domain.model.valueObject.UserId;
+import com.financialapp.users.domain.usecase.GetUserProfileUseCase;
 import com.financialapp.users.domain.usecase.UpdateUserPasswordUseCase;
 import com.financialapp.users.domain.usecase.UpdateUserProfileUseCase;
 import com.financialapp.users.domain.usecase.command.UpdateUserPasswordCommand;
 import com.financialapp.users.domain.usecase.command.UpdateUserProfileCommand;
 import com.financialapp.users.web.dto.request.UpdateUserPasswordRequest;
 import com.financialapp.users.web.dto.request.UpdateUserProfileRequest;
+import com.financialapp.users.web.dto.response.ProfileResponse;
 import com.financialapp.users.web.dto.response.UserProfileResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProfileController {
 
+    private final GetUserProfileUseCase getUserProfileUseCase;
     private final UpdateUserProfileUseCase updateProfileUseCase;
     private final UpdateUserPasswordUseCase updatePasswordUseCase;
     private final AuthenticationProviderGateway authProvider;
+
+    @GetMapping("/profile")
+    public ApiResponse<ProfileResponse> profile(@RequestHeader("X-User-Id") Long userId) {
+        User user = getUserProfileUseCase.execute(new UserId(userId));
+        return ApiResponse.ok("Profile retrieved successfully", ProfileResponse.fromDomain(user));
+    }
 
     @PutMapping("/profile")
     public ApiResponse<UserProfileResponse> updateProfile(

@@ -39,6 +39,7 @@ All responses use the shared envelope `{ status, title, code, message, data }` f
 | `GET` | `/api/v1/users/me/currency-rates` | `X-User-Id` | `ApiResponse<List<ManualCurrencyRateResponse>>` | `200 OK` |
 | `PUT` | `/api/v1/users/me/currency-rates/{currency}` | `X-User-Id`, `{ ratePerArs }` | `ApiResponse<ManualCurrencyRateResponse>` | `200 OK` |
 | `DELETE` | `/api/v1/users/me/currency-rates/{currency}` | `X-User-Id` | `ApiResponse<Void>` | `200 OK` |
+| `GET` | `/api/v1/users/me/profile` | `X-User-Id` | `ApiResponse<ProfileResponse>` | `200 OK` |
 | `PUT` | `/api/v1/users/me/profile` | `X-User-Id`, `{ firstName, lastName }` | `ApiResponse<UserProfileResponse>` | `200 OK` |
 | `PUT` | `/api/v1/users/me/password` | `X-User-Id`, `{ currentPassword, newPassword (≥8) }` | `ApiResponse<Void>` | `200 OK` |
 
@@ -67,6 +68,7 @@ back/ms-users/src/main/java/com/financialapp/users/
 ├── application/
 │   ├── AuthenticateUserUseCaseImp.java
 │   ├── GetUserPreferencesUseCaseImpl.java
+│   ├── GetUserProfileUseCaseImpl.java
 │   ├── ListManualCurrencyRatesUseCaseImpl.java
 │   ├── ListUserSessionsUseCaseImpl.java
 │   ├── RefreshSessionUseCaseImpl.java
@@ -117,6 +119,7 @@ back/ms-users/src/main/java/com/financialapp/users/
 │       ├── AuthenticateUserUseCase.java
 │       ├── DeleteManualCurrencyRateUseCase.java
 │       ├── GetUserPreferencesUseCase.java
+│       ├── GetUserProfileUseCase.java
 │       ├── ListManualCurrencyRatesUseCase.java
 │       ├── ListUserSessionsUseCase.java
 │       ├── RefreshSessionUseCase.java
@@ -190,6 +193,7 @@ back/ms-users/src/main/java/com/financialapp/users/
     │   └── response/
     │       ├── AuthResponse.java
     │       ├── ManualCurrencyRateResponse.java
+    │       ├── ProfileResponse.java
     │       ├── SessionResponse.java
     │       ├── UserProfileResponse.java
     │       └── UserPreferencesResponse.java
