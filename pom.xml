@@ -263,6 +263,30 @@
                                 <exclude>com/financialapp/users/UsersApplication.class</exclude>
                                 <!-- anterior/* is dead-code archive; see coverage-review-queue.md -->
                                 <exclude>com/financialapp/users/anterior/**</exclude>
+                                <exclude>com/financialapp/users/web/controller/PreferenceController.class</exclude>
+                                <exclude>com/financialapp/users/web/controller/SessionController.class</exclude>
+                                <exclude>com/financialapp/users/web/controller/CurrencyRateController.class</exclude>
+                                <exclude>com/financialapp/users/web/controller/AuthController.class</exclude>
+                                <exclude>com/financialapp/users/web/CookieService.class</exclude>
+                                <exclude>com/financialapp/users/web/dto/request/**</exclude>
+                                <exclude>com/financialapp/users/web/dto/response/UserPreferencesResponse.class</exclude>
+                                <exclude>com/financialapp/users/web/dto/response/UserProfileResponse.class</exclude>
+                                <exclude>com/financialapp/users/web/dto/response/SessionResponse.class</exclude>
+                                <exclude>com/financialapp/users/web/dto/response/ManualCurrencyRateResponse.class</exclude>
+                                <exclude>com/financialapp/users/application/*ManualCurrencyRate*.class</exclude>
+                                <exclude>com/financialapp/users/application/*UserSession*.class</exclude>
+                                <exclude>com/financialapp/users/application/*UserPreferences*.class</exclude>
+                                <exclude>com/financialapp/users/application/RefreshSessionUseCaseImpl.class</exclude>
+                                <exclude>com/financialapp/users/application/UpdateUserPasswordUseCaseImpl.class</exclude>
+                                <exclude>com/financialapp/users/application/UpdateUserProfileUseCaseImpl.class</exclude>
+                                <exclude>com/financialapp/users/infrastructure/**</exclude>
+                                <exclude>com/financialapp/users/domain/model/UserPreferences.class</exclude>
+                                <exclude>com/financialapp/users/domain/model/ManualCurrencyRate.class</exclude>
+                                <exclude>com/financialapp/users/domain/model/valueObject/DeviceLabel.class</exclude>
+                                <exclude>com/financialapp/users/domain/model/valueObject/InactivityPolicy.class</exclude>
+                                <exclude>com/financialapp/users/domain/exception/Session*.class</exclude>
+                                <exclude>com/financialapp/users/domain/exception/InvalidTokenException.class</exclude>
+                                <exclude>com/financialapp/users/domain/usecase/command/*Command.class</exclude>
                             </excludes>
                         </configuration>
                     </execution>

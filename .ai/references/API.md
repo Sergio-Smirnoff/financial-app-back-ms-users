@@ -22,6 +22,7 @@ Endpoints and error codes. Envelope shape: parent `.ai/references/APP_STRUCTURE.
 | GET | `/api/v1/users/me/currency-rates` | List custom manual FX rates | — |
 | PUT | `/api/v1/users/me/currency-rates/{currency}` | Set/upsert manual FX rate for currency | `invalid_currency` |
 | DELETE | `/api/v1/users/me/currency-rates/{currency}` | Delete manual FX rate override | — |
+| GET | `/api/v1/users/me/profile` | Read user profile (name, email, createdAt) | `user_not_found` |
 | PUT | `/api/v1/users/me/profile` | Update user profile (firstName, lastName) | `user_not_found` |
 | PUT | `/api/v1/users/me/password` | Change password & revoke other active sessions | `wrong_current_password`, `weak_password` |
 
