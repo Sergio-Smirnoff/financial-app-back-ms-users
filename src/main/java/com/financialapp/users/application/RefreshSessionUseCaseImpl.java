@@ -15,7 +15,6 @@ import com.financialapp.users.domain.repository.UserSessionRepository;
 import com.financialapp.users.domain.usecase.RefreshSessionUseCase;
 import com.financialapp.users.domain.usecase.command.RefreshSessionCommand;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +28,7 @@ public class RefreshSessionUseCaseImpl implements RefreshSessionUseCase {
     private final UserRepository repository;
     private final UserSessionRepository userSessionRepository;
     private final AuthenticationProviderGateway authProvider;
-
-    @Autowired(required = false)
-    private UserPreferencesRepository preferencesRepository;
+    private final UserPreferencesRepository preferencesRepository;
 
     @Override
     public Session execute(RefreshSessionCommand command) {
@@ -46,12 +43,10 @@ public class RefreshSessionUseCaseImpl implements RefreshSessionUseCase {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (preferencesRepository != null) {
-            UserPreferences prefs = preferencesRepository.findByUser(session.userId());
-            if (prefs.inactivityPolicy().exceededBy(session.lastSeenAt(), now)) {
-                userSessionRepository.save(session.revoke());
-                throw new SessionExpiredException("Session expired due to inactivity");
-            }
+        UserPreferences prefs = preferencesRepository.findByUser(session.userId());
+        if (prefs.inactivityPolicy().exceededBy(session.lastSeenAt(), now)) {
+            userSessionRepository.save(session.revoke());
+            throw new SessionExpiredException("Session expired due to inactivity");
         }
 
         User user = repository.findById(claims.userId())
