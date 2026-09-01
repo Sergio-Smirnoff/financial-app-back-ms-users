@@ -66,7 +66,7 @@ All cookies use `SameSite=Lax`. `Secure` is driven by the `app.cookie.secure` en
 back/ms-users/src/main/java/com/financialapp/users/
 ├── UsersApplication.java
 ├── application/
-│   ├── AuthenticateUserUseCaseImp.java
+│   ├── AuthenticateUserUseCaseImpl.java
 │   ├── GetUserPreferencesUseCaseImpl.java
 │   ├── GetUserProfileUseCaseImpl.java
 │   ├── ListManualCurrencyRatesUseCaseImpl.java

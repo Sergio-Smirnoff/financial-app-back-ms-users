@@ -30,14 +30,14 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticateUserUseCaseImpTest {
+class AuthenticateUserUseCaseImplTest {
 
     @Mock UserRepository repository;
     @Mock UserSessionRepository userSessionRepository;
     @Mock PasswordHashGateway passwordHashGateway;
     @Mock AuthenticationProviderGateway authProvider;
 
-    @InjectMocks AuthenticateUserUseCaseImp useCase;
+    @InjectMocks AuthenticateUserUseCaseImpl useCase;
 
     private static final AuthenticateUserCommand COMMAND =
             new AuthenticateUserCommand("a@b.com", "secret");
