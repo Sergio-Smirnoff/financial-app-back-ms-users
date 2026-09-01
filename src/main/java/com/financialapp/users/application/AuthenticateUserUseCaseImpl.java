@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AuthenticateUserUseCaseImp implements AuthenticateUserUseCase {
+public class AuthenticateUserUseCaseImpl implements AuthenticateUserUseCase {
 
     private final UserRepository repository;
     private final UserSessionRepository userSessionRepository;
