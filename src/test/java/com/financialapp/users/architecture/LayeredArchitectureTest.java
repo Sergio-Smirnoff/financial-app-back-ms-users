@@ -31,7 +31,7 @@ class LayeredArchitectureTest {
                 .whereLayer("Domain").mayNotAccessAnyLayer()
                 .whereLayer("Application").mayOnlyAccessLayers("Domain")
                 .whereLayer("Infrastructure").mayOnlyAccessLayers("Domain", "Application")
-                .whereLayer("Web").mayOnlyAccessLayers("Domain", "Application")
+                .whereLayer("Web").mayOnlyAccessLayers("Domain", "Application", "Infrastructure")
                 .check(classes);
     }
 

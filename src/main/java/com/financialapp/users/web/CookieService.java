@@ -1,6 +1,7 @@
 package com.financialapp.users.web;
 
 import com.financialapp.users.domain.model.Session;
+import com.financialapp.users.infrastructure.config.JwtProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -13,39 +14,45 @@ import java.util.List;
 @Service
 public class CookieService {
 
+    private static final long THIRTY_DAYS_MS = 30L * 24 * 60 * 60 * 1000;
+
     private final boolean secure;
-    private final long accessTokenMaxAge;
-    private final long refreshTokenMaxAge;
+    private final JwtProperties jwtProperties;
 
     public CookieService(@Value("${app.cookie.secure:false}") boolean secure,
-                         @Value("${jwt.expiration:86400000}") long jwtExpiration,
-                         @Value("${jwt.refresh-expiration:604800000}") long jwtRefreshExpiration) {
+                         JwtProperties jwtProperties) {
         this.secure = secure;
-        this.accessTokenMaxAge = jwtExpiration / 1000;
-        this.refreshTokenMaxAge = jwtRefreshExpiration / 1000;
+        this.jwtProperties = jwtProperties;
     }
 
     public ResponseCookie createAccessTokenCookie(String token) {
+        long maxAgeSec = jwtProperties.getExpiration() / 1000;
         return ResponseCookie.from("access_token", token)
                 .httpOnly(true).secure(secure).sameSite("Lax")
-                .path("/api").maxAge(Duration.ofSeconds(accessTokenMaxAge)).build();
+                .path("/api").maxAge(Duration.ofSeconds(maxAgeSec)).build();
+    }
+
+    public ResponseCookie createRefreshTokenCookie(String token, boolean rememberMe) {
+        long ttlMs = rememberMe ? THIRTY_DAYS_MS : jwtProperties.getRefreshExpiration();
+        return ResponseCookie.from("refresh_token", token)
+                .httpOnly(true).secure(secure).sameSite("Lax")
+                .path("/api/v1/auth/refresh").maxAge(Duration.ofSeconds(ttlMs / 1000)).build();
     }
 
     public ResponseCookie createRefreshTokenCookie(String token) {
-        return ResponseCookie.from("refresh_token", token)
-                .httpOnly(true).secure(secure).sameSite("Lax")
-                .path("/api/v1/auth/refresh").maxAge(Duration.ofSeconds(refreshTokenMaxAge)).build();
+        return createRefreshTokenCookie(token, false);
     }
 
     public ResponseCookie createUserInfoCookie(Session session) {
         var user = session.user();
+        long maxAgeSec = jwtProperties.getExpiration() / 1000;
         String value = URLEncoder.encode(
                 user.id().value() + "|" + user.email() + "|" + user.firstName() + "+" + user.lastName(),
                 StandardCharsets.UTF_8
         );
         return ResponseCookie.from("user_info", value)
                 .httpOnly(false).secure(secure).sameSite("Lax")
-                .path("/").maxAge(Duration.ofSeconds(accessTokenMaxAge)).build();
+                .path("/").maxAge(Duration.ofSeconds(maxAgeSec)).build();
     }
 
     public List<ResponseCookie> createLogoutCookies() {
